@@ -1,5 +1,6 @@
 package com.example.taskmodel.storage;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -80,6 +81,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         myOutput.flush();
         myOutput.close();
         myInput.close();
+    }
+
+    public boolean insertData(String naziv, String id, String pocetak, String kraj, String tag) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_NAZIV, naziv);
+        contentValues.put(COLUMN_ID, id);
+        contentValues.put(COLUMN_POCETAK, pocetak);
+        contentValues.put(COLUMN_KRAJ, kraj);
+        contentValues.put(COLUMN_TAG, tag);
+
+        long result = sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
+        if (result == -1) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public void openDataBase() throws SQLException {

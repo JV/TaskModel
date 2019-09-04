@@ -52,13 +52,7 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         holder.tvPocetak.setText(String.valueOf(elementModels.get(position).getPocetak()));
         holder.tvKraj.setText(String.valueOf(elementModels.get(position).getId()));
 
-        if(elementModels.get(position).getTag().equals("0")) {
-            holder.lineTextViewTopHalf.setVisibility(View.VISIBLE);
-        }
 
-        if (elementModels.get(position).getTag().equals("")) {
-            holder.lineTextViewBottomHalf.setVisibility(View.GONE);
-        }
     }
 
     class ElementHolder extends RecyclerView.ViewHolder {
