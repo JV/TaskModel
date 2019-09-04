@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <EditText
+        android:id="@+id/etEditNaziv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/addNaziv" />
+
+    <EditText
+        android:id="@+id/etEditPocetak"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/addPocetak"
+        android:inputType="number" />
+
+    <TimePicker
+        android:id="@+id/editTimepicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"></TimePicker>
+
+    <EditText
+        android:id="@+id/etEditTag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/addTag" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center">
+
+        <Button
+            android:id="@+id/btnSaveEditElement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="@string/saveEditElementButton" />
+
+        <Button
+            android:id="@+id/btnCancelEditElement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/cancelAddElementButton" />
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>

@@ -1,0 +1,122 @@
+package com.example.taskmodel.fragments;
+
+import android.os.Build;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.taskmodel.MainActivity;
+import com.example.taskmodel.R;
+import com.example.taskmodel.element.ElementModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.List;
+
+public class AddElementFragment extends Fragment {
+
+    private List<ElementModel> elementModels;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        Bundle bundle = this.getArguments();
+        elementModels = (List<ElementModel>) bundle.getSerializable("valuesList");
+        return inflater.inflate(R.layout.fragment_add_element, container, false);
+
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        final EditText etNaziv = view.findViewById(R.id.etNaziv);
+        final EditText etPocetak = view.findViewById(R.id.etPocetak);
+        final EditText etTag = view.findViewById(R.id.etTag);
+        final TimePicker timePicker = view.findViewById(R.id.timepicker);
+        Button btnAddElement = view.findViewById(R.id.btnAddElement);
+        Button btnCancelAddElement = view.findViewById(R.id.btnCancelAddElement);
+
+        btnAddElement.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                ElementModel elementModel = new ElementModel();
+                elementModel.setId(elementModels.get(elementModels.size() - 1).getId() + 1);
+                if(etNaziv.getText().toString().equals("")) {
+                    Toast.makeText(getContext(), "Please enter name", Toast.LENGTH_LONG).show();
+                    etNaziv.requestFocus();
+                    return;
+                } else {
+                    elementModel.setNaziv(etNaziv.getText().toString());
+                }
+
+                if(etPocetak.getText().toString().equals("")) {
+                    Toast.makeText(getContext(), "Please enter beginning", Toast.LENGTH_LONG).show();
+                    etPocetak.requestFocus();
+                    return;
+                } else {
+                    elementModel.setPocetak(Long.parseLong(etPocetak.getText().toString()));
+                }
+
+                if(etTag.getText().toString().equals("")) {
+                    Toast.makeText(getContext(), "Please enter end", Toast.LENGTH_LONG).show();
+                    etTag.requestFocus();
+                    return;
+                } else {
+                    elementModel.setTag(etTag.getText().toString());
+                }
+
+                elementModel.setId(elementModels.get(elementModels.size() - 1).getId() + 1);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    long hour, minute;
+                    hour = (long) timePicker.getHour();
+                    minute = (long) timePicker.getMinute();
+                    elementModel.setKraj((long) timePicker.getHour());
+                }
+
+                if((etPocetak.getText().toString().equals(""))) {
+
+
+                } else {
+                    elementModels.add(0, elementModel);
+                    RecyclerView recyclerView = getActivity().findViewById(R.id.recyclerviewMain);
+                    ((MainActivity) getActivity()).prepareElementData();
+                    recyclerView.getAdapter().notifyDataSetChanged();
+                    getFragmentManager().beginTransaction().remove(AddElementFragment.this).commit();
+                    FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
+                    fab.show();
+                }
+
+
+
+            }
+        });
+        btnCancelAddElement.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getFragmentManager().beginTransaction().remove(AddElementFragment.this).commit();
+                FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
+                fab.show();
+            }
+        });
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
+        fab.show();
+    }
+}
