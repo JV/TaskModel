@@ -29,8 +29,8 @@ import java.util.List;
 public class AddElementFragment extends Fragment {
 
     private List<ElementModel> elementModels;
-    SharedPreferences sharedPreferences;
-    Context mContext;
+    private SharedPreferences sharedPreferences;
+    private Context mContext;
 
     @Nullable
     @Override

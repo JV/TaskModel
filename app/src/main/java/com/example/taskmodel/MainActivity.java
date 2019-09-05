@@ -2,8 +2,9 @@ package com.example.taskmodel;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Message;
+import android.os.Process;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmodel.adapters.ElementModelViewAdapter;
 import com.example.taskmodel.adapters.SimpleItemTouchHelperCallback;
+import com.example.taskmodel.backgroundTasks.UiHandlerThread;
 import com.example.taskmodel.element.ElementModel;
 import com.example.taskmodel.fragments.AddElementFragment;
 import com.example.taskmodel.fragments.EditElementFragment;
@@ -38,23 +40,17 @@ public class MainActivity extends AppCompatActivity {
     List<ElementModel> elementModels = new ArrayList<>();
     Set<String> numberOfDifferentTags = new HashSet<>();
     int[][] positions = new int[numberOfDifferentTags.size()][];
-
-
     SharedPreferences sharedPreferences;
+    UiHandlerThread handlerThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-
-        // mock data creation and save on first installation
-
         if (!sharedPreferences.getBoolean("firstTime", false)) {
-
             populateLists();
             SharedPreferences.Editor editor1 = sharedPreferences.edit();
             editor1.putBoolean("firstTime", true);
@@ -62,29 +58,33 @@ public class MainActivity extends AppCompatActivity {
             saveMockData();
         }
 
+        handlerThread = new UiHandlerThread("handleUIUpdateOnTagValue", Process.THREAD_PRIORITY_DEFAULT, elementModels, this, recyclerViewMain);
+        handlerThread.start();
+
         initViews();
-
         setupListeners();
-
         loadPrefs();
 
         setUpScreen();
 
     }
 
-    // save mock data
+    public void doWork(View view) {
+        Message message = Message.obtain();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("valuesList", (Serializable) elementModels);
+        message.setData(bundle);
+        handlerThread.getHandler().sendMessage(message);
+    }
 
     private void saveMockData() {
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(elementModels);
-
         editor.putString("MyObjectsList", json);
         editor.apply();
     }
-
-    // load last saved data
 
     private void loadPrefs() {
 
@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
         Type type = new TypeToken<List<ElementModel>>() {
         }.getType();
         elementModels = gson.fromJson(json, type);
-
     }
 
     private void setUpScreen() {
@@ -101,8 +100,6 @@ public class MainActivity extends AppCompatActivity {
         prepareElementData();
 
         mmAdapter = new ElementModelViewAdapter(elementModels, getApplicationContext(), numberOfDifferentTags);
-
-
         recyclerViewMain.setLayoutManager(new LinearLayoutManager(this));
         SimpleItemTouchHelperCallback simpleItemTouchHelperCallback = new SimpleItemTouchHelperCallback(mmAdapter, getApplicationContext());
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchHelperCallback);
@@ -110,21 +107,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewMain.setAdapter(mmAdapter);
         itemTouchHelper.attachToRecyclerView(recyclerViewMain);
         recyclerViewMain.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-
-//        recyclerViewMain.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                mmAdapter.notifyDataSetChanged();
-//            }
-//        });
+        doWork(recyclerViewMain);
     }
-
-    //sort object list by @pocetak attribute
 
     public void prepareElementData() {
 
         if (!sharedPreferences.getBoolean("listMovedAround", false)) {
-
             Collections.sort(elementModels, new Comparator<ElementModel>() {
 
                 @Override
@@ -133,10 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-
         saveDifferentTags();
-
-//        getPositionOfItemsWithSameTag();
     }
 
     private void getPositionOfItemsWithSameTag() {
@@ -151,35 +136,24 @@ public class MainActivity extends AppCompatActivity {
                 positions = new int[][]{{Integer.parseInt(tag2), Integer.parseInt(elementModels.get((int) itemPosition).getTag())}};
 
             }
-
-            Log.d("TEST", positions.toString());
             itemPosition++;
         }
-
     }
 
     private boolean checkTag(ElementModel elementModel) {
-
         return true;
-
     }
 
     private void saveDifferentTags() {
         for (ElementModel elementModel : elementModels) {
-
             numberOfDifferentTags.add(elementModel.getTag());
-
         }
     }
 
     private void initViews() {
-
         recyclerViewMain = findViewById(R.id.recyclerviewMain);
         floatingActionButton = findViewById(R.id.floating_action_button);
-
     }
-
-    //add element to list via FloatingActionButton
 
     private void setupListeners() {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -198,25 +172,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // edit element in list
-
     public void showItem(View view) {
 
         long itemPosition = (long) recyclerViewMain.getChildLayoutPosition(view);
-
         Bundle bundle = new Bundle();
         bundle.putSerializable("valuesList", (Serializable) elementModels);
         bundle.putLong("editItemPosition", itemPosition);
-
         EditElementFragment editElementFragment = new EditElementFragment();
         editElementFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.activityMain, editElementFragment).commit();
-
         floatingActionButton.hide();
-
     }
-
-    // populate mock data
 
     private void populateLists() {
 
@@ -236,5 +202,11 @@ public class MainActivity extends AppCompatActivity {
             elementModels.add(elementModel);
             i++;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handlerThread.quit();
     }
 }

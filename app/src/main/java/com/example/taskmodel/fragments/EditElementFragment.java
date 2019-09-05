@@ -28,8 +28,8 @@ import java.util.List;
 
 public class EditElementFragment extends Fragment {
 
-    SharedPreferences sharedPreferences;
-    Context mContext;
+    private SharedPreferences sharedPreferences;
+    private Context mContext;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Nullable
