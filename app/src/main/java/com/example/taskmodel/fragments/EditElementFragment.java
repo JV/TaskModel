@@ -1,7 +1,10 @@
 package com.example.taskmodel.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,16 +22,22 @@ import com.example.taskmodel.MainActivity;
 import com.example.taskmodel.R;
 import com.example.taskmodel.element.ElementModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
 
 import java.util.List;
 
 public class EditElementFragment extends Fragment {
+
+    SharedPreferences sharedPreferences;
+    Context mContext;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+
+        mContext = getActivity().getApplicationContext();
         Bundle bundle = this.getArguments();
         final List<ElementModel> elementModels = (List<ElementModel>) bundle.getSerializable("valuesList");
         final long itemPosition = bundle.getLong("editItemPosition");
@@ -58,6 +67,15 @@ public class EditElementFragment extends Fragment {
                 RecyclerView recyclerView = getActivity().findViewById(R.id.recyclerviewMain);
                 ((MainActivity) getActivity()).prepareElementData();
                 recyclerView.getAdapter().notifyDataSetChanged();
+
+                Gson gson = new Gson();
+                String json = gson.toJson(elementModels);
+
+                sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                editor.putString("MyObjectsList", json);
+                editor.apply();
 
                 getFragmentManager().beginTransaction().remove(EditElementFragment.this).commit();
                 FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);

@@ -1,5 +1,7 @@
 package com.example.taskmodel.adapters;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -15,6 +17,7 @@ import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.taskmodel.MainActivity;
 import com.example.taskmodel.R;
 import com.example.taskmodel.element.ElementModel;
 import com.example.taskmodel.view.LineTextView;
@@ -22,6 +25,7 @@ import com.google.gson.Gson;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelViewAdapter.ElementHolder> implements SimpleItemTouchHelperCallback.ItemTouchHelperAdapter {
 
@@ -29,11 +33,13 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
     private ItemTouchHelper touchHelper;
     SharedPreferences sharedPreferences;
     Context mContext;
+    private int limit;
 
-    public ElementModelViewAdapter(List<ElementModel> elementModels, Context context) {
+    public ElementModelViewAdapter(List<ElementModel> elementModels, Context context, Set set) {
 
         this.elementModels = elementModels;
         this.mContext = context;
+        this.limit = set.size();
     }
 
     @NonNull
@@ -41,18 +47,34 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
     public ElementModelViewAdapter.ElementHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.element_item, parent, false);
-
-        return new ElementHolder(view);
+        ElementHolder holder = new ElementHolder(view, elementModels);
+        return holder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ElementHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ElementHolder holder, final int position) {
 
         holder.tvNaziv.setText(elementModels.get(position).getNaziv());
         holder.tvPocetak.setText(String.valueOf(elementModels.get(position).getPocetak()));
         holder.tvKraj.setText(String.valueOf(elementModels.get(position).getId()));
 
+        holder.tvTag.setText(elementModels.get(position).getTag());
+        int realPosition = holder.getAdapterPosition();
+        Log.d("TAGS", "onBindViewHolder: " + realPosition);
+        Log.d("TAG", "onBindViewHolder: " + elementModels.get(realPosition).getTag());
+        //this code does nothing
 
+
+//        if(elementModels.get(realPosition).getTag().equals("1")) {
+//            Log.d("TESTRUN", "onBindViewHolderTre: " + "testrun");
+//            holder.lineTextViewTopHalf.setVisibility(View.INVISIBLE);
+//            holder.lineTextViewBottomHalf.setVisibility(View.INVISIBLE);
+//        } else {
+//            Log.d("TESTRUN", "onBindViewHolderFas: " + "testrun");
+//
+//            holder.lineTextViewBottomHalf.setVisibility(View.VISIBLE);
+//            holder.lineTextViewTopHalf.setVisibility(View.VISIBLE);
+//        }
     }
 
     class ElementHolder extends RecyclerView.ViewHolder {
@@ -60,20 +82,29 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         TextView tvNaziv;
         TextView tvPocetak;
         TextView tvKraj;
-        RecyclerView recyclerViewMain;
+        TextView tvTag;
         LineTextView lineTextViewTopHalf;
         LineTextView lineTextViewBottomHalf;
 
-        ElementHolder(@NonNull View itemView) {
+
+        public ElementHolder(@NonNull View itemView, List<ElementModel> elementModels) {
 
             super(itemView);
+
             tvNaziv = itemView.findViewById(R.id.tvNaziv);
             tvPocetak = itemView.findViewById(R.id.tvPocetak);
             tvKraj = itemView.findViewById(R.id.tvKraj);
-            recyclerViewMain = itemView.findViewById(R.id.recyclerviewMain);
             lineTextViewTopHalf = itemView.findViewById(R.id.lineTextViewTopHalf);
             lineTextViewBottomHalf = itemView.findViewById(R.id.lineTextViewBottomHalf);
+            tvTag = itemView.findViewById(R.id.tvTag);
 
+
+            //this code does nothing
+//            if(position == 0) {
+//                lineTextViewTopHalf.setVisibility(View.GONE);
+//            } else if (position == elementModels.size()) {
+//                lineTextViewBottomHalf.setVisibility(View.GONE);
+//            }
         }
     }
 
@@ -89,9 +120,7 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
 
     @Override
     public long getItemId(int position) {
-
         return super.getItemId(position);
-
     }
 
     @Override

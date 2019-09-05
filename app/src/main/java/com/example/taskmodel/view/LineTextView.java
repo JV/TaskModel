@@ -18,12 +18,10 @@ public class LineTextView extends AppCompatTextView {
 
     public LineTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
     }
 
     public LineTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
     }
 
     @Override

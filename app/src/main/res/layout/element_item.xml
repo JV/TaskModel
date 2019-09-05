@@ -2,6 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="96dp"
+    android:clickable="true"
+    android:focusable="true"
     android:onClick="showItem"
     android:orientation="horizontal">
 
@@ -43,6 +45,11 @@
                 android:layout_margin="4dp"
                 android:text="TextView" />
 
+            <TextView
+                android:id="@+id/tvTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
         </LinearLayout>
 
     </LinearLayout>
@@ -55,17 +62,16 @@
 
         <com.example.taskmodel.view.LineTextView
             android:id="@+id/lineTextViewTopHalf"
-            android:layout_width="2dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            />
+            android:visibility="invisible"/>
 
         <com.example.taskmodel.view.LineTextView
             android:id="@+id/lineTextViewBottomHalf"
             android:layout_width="2dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            />
+            android:layout_weight="1" />
 
     </LinearLayout>
 

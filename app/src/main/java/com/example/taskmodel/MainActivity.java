@@ -3,6 +3,7 @@ package com.example.taskmodel;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,7 +26,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     ElementModelViewAdapter mmAdapter;
     FloatingActionButton floatingActionButton;
     List<ElementModel> elementModels = new ArrayList<>();
+    Set<String> numberOfDifferentTags = new HashSet<>();
+    int[][] positions = new int[numberOfDifferentTags.size()][];
+
 
     SharedPreferences sharedPreferences;
 
@@ -94,8 +100,10 @@ public class MainActivity extends AppCompatActivity {
 
         prepareElementData();
 
+        mmAdapter = new ElementModelViewAdapter(elementModels, getApplicationContext(), numberOfDifferentTags);
+
+
         recyclerViewMain.setLayoutManager(new LinearLayoutManager(this));
-        mmAdapter = new ElementModelViewAdapter(elementModels, getApplicationContext());
         SimpleItemTouchHelperCallback simpleItemTouchHelperCallback = new SimpleItemTouchHelperCallback(mmAdapter, getApplicationContext());
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchHelperCallback);
         mmAdapter.setTouchHelper(itemTouchHelper);
@@ -103,6 +111,12 @@ public class MainActivity extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(recyclerViewMain);
         recyclerViewMain.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
+//        recyclerViewMain.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mmAdapter.notifyDataSetChanged();
+//            }
+//        });
     }
 
     //sort object list by @pocetak attribute
@@ -118,6 +132,43 @@ public class MainActivity extends AppCompatActivity {
                     return t1.getPocetak() < elementModel.getPocetak() ? -1 : (t1.getPocetak() > elementModel.getPocetak()) ? 1 : 0;
                 }
             });
+        }
+
+        saveDifferentTags();
+
+//        getPositionOfItemsWithSameTag();
+    }
+
+    private void getPositionOfItemsWithSameTag() {
+        List<String> listOfTags = new ArrayList<>(numberOfDifferentTags);
+        long itemPosition = 0;
+        String tag = listOfTags.get(0);
+        String tag2 = listOfTags.get(1);
+        while (itemPosition != elementModels.size()) {
+            if ((elementModels.get((int) itemPosition).getTag()).equals(tag)) {
+                positions = new int[][]{{Integer.parseInt(tag), Integer.parseInt(elementModels.get((int) itemPosition).getTag())}};
+            } else {
+                positions = new int[][]{{Integer.parseInt(tag2), Integer.parseInt(elementModels.get((int) itemPosition).getTag())}};
+
+            }
+
+            Log.d("TEST", positions.toString());
+            itemPosition++;
+        }
+
+    }
+
+    private boolean checkTag(ElementModel elementModel) {
+
+        return true;
+
+    }
+
+    private void saveDifferentTags() {
+        for (ElementModel elementModel : elementModels) {
+
+            numberOfDifferentTags.add(elementModel.getTag());
+
         }
     }
 
@@ -178,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
             elementModel.setPocetak(i);
             elementModel.setKraj(i + i);
             if (i % 2 != 0) {
-                elementModel.setTag("");
+                elementModel.setTag("1");
             } else {
                 elementModel.setTag("" + i % 2);
             }
