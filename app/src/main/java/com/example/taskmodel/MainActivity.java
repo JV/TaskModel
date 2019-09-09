@@ -78,19 +78,17 @@ public class MainActivity extends AppCompatActivity implements DoWork {
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-
         Gson gson = new Gson();
+        String json1 = gson.toJson(coordinates);
+        editor.putString("CoordinatesList", json1);
+        editor.apply();
+
         String json = sharedPreferences.getString("CoordinatesList", "");
         Type type = new TypeToken<List<List<Integer>>>() {
         }.getType();
         coordinates = gson.fromJson(json, type);
 
         if (!sharedPreferences.getBoolean("firstTime", false)) {
-
-
-            String json1 = gson.toJson(coordinates);
-            editor.putString("CoordinatesList", json1);
-            editor.apply();
 
             populateLists();
             SharedPreferences.Editor editor1 = sharedPreferences.edit();

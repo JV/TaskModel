@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/elementItem"
     android:layout_width="match_parent"
     android:layout_height="96dp"
     android:background="@android:color/transparent"
@@ -10,9 +11,8 @@
 
     <LinearLayout
 
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:background="@android:color/transparent"
         android:orientation="vertical">
 
@@ -28,7 +28,6 @@
                 android:id="@+id/tvPocetak"
                 android:layout_width="48dp"
                 android:layout_height="wrap_content"
-
                 android:layout_margin="4dp"
                 android:text="asfa" />
 
@@ -54,23 +53,13 @@
 
     <LinearLayout
 
-        android:id="@+id/pipelines"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:id="@+id/conncectionHolders"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:orientation="vertical">
-
-        <com.example.taskmodel.view.LineTextView
-            android:id="@+id/lineTextViewTopHalf"
-            android:layout_width="2dp"
-            android:layout_height="match_parent" />
-
-        <com.example.taskmodel.view.LineTextView
-            android:id="@+id/lineTextViewBottomHalf"
-            android:layout_width="2dp"
-            android:layout_height="match_parent" />
+        android:orientation="horizontal">
 
     </LinearLayout>
+
 
 </LinearLayout>
