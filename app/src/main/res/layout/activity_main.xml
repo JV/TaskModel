@@ -5,15 +5,17 @@
     android:id="@+id/activityMain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@android:color/transparent"
     android:orientation="vertical"
+    android:backgroundTint="@android:color/white"
     tools:context=".MainActivity">
 
     <androidx.recyclerview.widget.RecyclerView
 
         android:id="@+id/recyclerviewMain"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
 

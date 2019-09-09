@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmodel.MainActivity;
 import com.example.taskmodel.R;
@@ -30,6 +29,15 @@ public class EditElementFragment extends Fragment {
 
     private SharedPreferences sharedPreferences;
     private Context mContext;
+    private List<ElementModel> elementModels;
+    private long itemPosition;
+    EditText etNaziv;
+    EditText etPocetak;
+    EditText etTag;
+    TimePicker timePicker;
+    Button btnSaveEdit;
+    Button btnCancelEdit;
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Nullable
@@ -39,21 +47,27 @@ public class EditElementFragment extends Fragment {
 
         mContext = getActivity().getApplicationContext();
         Bundle bundle = this.getArguments();
+
+//        elementModels = (List<ElementModel>) bundle.getSerializable("valuesList");
         final List<ElementModel> elementModels = (List<ElementModel>) bundle.getSerializable("valuesList");
+//        itemPosition = bundle.getLong("editItemPosition");
         final long itemPosition = bundle.getLong("editItemPosition");
 
         View view = inflater.inflate(R.layout.edit_element_fragment, container, false);
-        final EditText etNaziv = view.findViewById(R.id.etEditNaziv);
-        final EditText etPocetak = view.findViewById(R.id.etEditPocetak);
-        final EditText etTag = view.findViewById(R.id.etEditTag);
-        final TimePicker timePicker = view.findViewById(R.id.editTimepicker);
-        Button btnSaveEdit = view.findViewById(R.id.btnSaveEditElement);
-        Button btnCancelEdit = view.findViewById(R.id.btnCancelEditElement);
+        etNaziv = view.findViewById(R.id.etEditNaziv);
+        etPocetak = view.findViewById(R.id.etEditPocetak);
+        etTag = view.findViewById(R.id.etEditTag);
+        timePicker = view.findViewById(R.id.editTimepicker);
+        btnSaveEdit = view.findViewById(R.id.btnSaveEditElement);
+        btnCancelEdit = view.findViewById(R.id.btnCancelEditElement);
 
         etNaziv.setText(elementModels.get((int) itemPosition).getNaziv());
         etPocetak.setText(elementModels.get((int) itemPosition).getPocetak().toString());
         etTag.setText(elementModels.get((int) itemPosition).getTag());
+
+        //convert milis to hour and minute
         timePicker.setHour(Integer.parseInt(elementModels.get((int) itemPosition).getKraj().toString()));
+        timePicker.setMinute(Integer.parseInt(elementModels.get((int) itemPosition).getKraj().toString()));
 
         btnSaveEdit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,10 +78,6 @@ public class EditElementFragment extends Fragment {
                 elementModels.get((int) itemPosition).setKraj((long) timePicker.getHour());
                 elementModels.get((int) itemPosition).setTag(etTag.getText().toString());
 
-                RecyclerView recyclerView = getActivity().findViewById(R.id.recyclerviewMain);
-                ((MainActivity) getActivity()).prepareElementData();
-                recyclerView.getAdapter().notifyDataSetChanged();
-
                 Gson gson = new Gson();
                 String json = gson.toJson(elementModels);
 
@@ -77,9 +87,13 @@ public class EditElementFragment extends Fragment {
                 editor.putString("MyObjectsList", json);
                 editor.apply();
 
-                getFragmentManager().beginTransaction().remove(EditElementFragment.this).commit();
+
+
                 FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
                 fab.show();
+
+                getFragmentManager().beginTransaction().remove(EditElementFragment.this).commit();
+
             }
         });
 

@@ -16,7 +16,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmodel.MainActivity;
 import com.example.taskmodel.R;
@@ -40,8 +39,6 @@ public class AddElementFragment extends Fragment {
         elementModels = (List<ElementModel>) bundle.getSerializable("valuesList");
         mContext = getActivity().getApplicationContext();
         return inflater.inflate(R.layout.fragment_add_element, container, false);
-
-
     }
 
     @Override
@@ -61,7 +58,7 @@ public class AddElementFragment extends Fragment {
 
                 ElementModel elementModel = new ElementModel();
                 elementModel.setId(elementModels.get(elementModels.size() - 1).getId() + 1);
-                if(etNaziv.getText().toString().equals("")) {
+                if (etNaziv.getText().toString().equals("")) {
                     Toast.makeText(getContext(), "Please enter name", Toast.LENGTH_LONG).show();
                     etNaziv.requestFocus();
                     return;
@@ -69,7 +66,7 @@ public class AddElementFragment extends Fragment {
                     elementModel.setNaziv(etNaziv.getText().toString());
                 }
 
-                if(etPocetak.getText().toString().equals("")) {
+                if (etPocetak.getText().toString().equals("")) {
                     Toast.makeText(getContext(), "Please enter beginning", Toast.LENGTH_LONG).show();
                     etPocetak.requestFocus();
                     return;
@@ -77,7 +74,7 @@ public class AddElementFragment extends Fragment {
                     elementModel.setPocetak(Long.parseLong(etPocetak.getText().toString()));
                 }
 
-                if(etTag.getText().toString().equals("")) {
+                if (etTag.getText().toString().equals("")) {
                     Toast.makeText(getContext(), "Please enter end", Toast.LENGTH_LONG).show();
                     etTag.requestFocus();
                     return;
@@ -91,17 +88,16 @@ public class AddElementFragment extends Fragment {
                     long hour, minute;
                     hour = (long) timePicker.getHour();
                     minute = (long) timePicker.getMinute();
+
+                    //turn to milisec
                     elementModel.setKraj((long) timePicker.getHour());
                 }
 
-                if((etPocetak.getText().toString().equals(""))) {
+                if ((etPocetak.getText().toString().equals(""))) {
 
 
                 } else {
                     elementModels.add(0, elementModel);
-                    RecyclerView recyclerView = getActivity().findViewById(R.id.recyclerviewMain);
-                    ((MainActivity) getActivity()).prepareElementData();
-                    recyclerView.getAdapter().notifyDataSetChanged();
 
                     Gson gson = new Gson();
                     String json = gson.toJson(elementModels);
@@ -113,12 +109,12 @@ public class AddElementFragment extends Fragment {
                     editor.apply();
 
                     getFragmentManager().beginTransaction().remove(AddElementFragment.this).commit();
+
+
                     FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
                     fab.show();
+
                 }
-
-
-
             }
         });
         btnCancelAddElement.setOnClickListener(new View.OnClickListener() {

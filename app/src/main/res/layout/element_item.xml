@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="96dp"
+    android:background="@android:color/transparent"
     android:clickable="true"
     android:focusable="true"
     android:onClick="showItem"
@@ -9,15 +10,17 @@
 
     <LinearLayout
 
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
         android:orientation="vertical">
 
         <LinearLayout
 
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:background="@android:color/transparent"
             android:orientation="horizontal">
 
             <TextView
@@ -45,33 +48,28 @@
                 android:layout_margin="4dp"
                 android:text="TextView" />
 
-            <TextView
-                android:id="@+id/tvTag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
         </LinearLayout>
 
     </LinearLayout>
 
     <LinearLayout
 
-        android:layout_width="2dp"
+        android:id="@+id/pipelines"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
         android:orientation="vertical">
 
         <com.example.taskmodel.view.LineTextView
             android:id="@+id/lineTextViewTopHalf"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:visibility="invisible"/>
+            android:layout_width="2dp"
+            android:layout_height="match_parent" />
 
         <com.example.taskmodel.view.LineTextView
             android:id="@+id/lineTextViewBottomHalf"
             android:layout_width="2dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 
