@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,8 +90,9 @@ public class AddElementFragment extends Fragment {
                     hour = (long) timePicker.getHour();
                     minute = (long) timePicker.getMinute();
 
-                    //turn to milisec
-                    elementModel.setKraj((long) timePicker.getHour());
+                    long totalTime = hour * 60 + minute;
+
+                    elementModel.setKraj(totalTime);
                 }
 
                 if ((etPocetak.getText().toString().equals(""))) {

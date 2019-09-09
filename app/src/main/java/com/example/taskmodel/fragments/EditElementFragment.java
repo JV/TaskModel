@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,9 +66,11 @@ public class EditElementFragment extends Fragment {
         etPocetak.setText(elementModels.get((int) itemPosition).getPocetak().toString());
         etTag.setText(elementModels.get((int) itemPosition).getTag());
 
-        //convert milis to hour and minute
-        timePicker.setHour(Integer.parseInt(elementModels.get((int) itemPosition).getKraj().toString()));
-        timePicker.setMinute(Integer.parseInt(elementModels.get((int) itemPosition).getKraj().toString()));
+        long totalTimeGet = elementModels.get((int) itemPosition).getKraj();
+        long hourSet = totalTimeGet / 60;
+        long minuteSet = totalTimeGet % 60;
+        timePicker.setHour((int) hourSet);
+        timePicker.setMinute((int) minuteSet);
 
         btnSaveEdit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,7 +78,10 @@ public class EditElementFragment extends Fragment {
 
                 elementModels.get((int) itemPosition).setNaziv(etNaziv.getText().toString());
                 elementModels.get((int) itemPosition).setPocetak(Long.valueOf(etPocetak.getText().toString()));
-                elementModels.get((int) itemPosition).setKraj((long) timePicker.getHour());
+                long hour = timePicker.getHour();
+                long minute = timePicker.getMinute();
+                long totalTime = hour * 60 + minute;
+                elementModels.get((int) itemPosition).setKraj(totalTime);
                 elementModels.get((int) itemPosition).setTag(etTag.getText().toString());
 
                 Gson gson = new Gson();
@@ -86,8 +92,6 @@ public class EditElementFragment extends Fragment {
 
                 editor.putString("MyObjectsList", json);
                 editor.apply();
-
-
 
                 FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
                 fab.show();
