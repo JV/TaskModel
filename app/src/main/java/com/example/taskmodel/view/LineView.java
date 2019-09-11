@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.widget.AppCompatTextView;
@@ -25,6 +24,11 @@ public class LineView extends AppCompatTextView {
     float stopY;
     private Path path;
     private View view;
+    private boolean matchFirst;
+    private boolean belongs;
+    private boolean matchLast;
+    private boolean matchUnique;
+    private boolean noMatch;
 
     public LineView(Context context) {
         super(context);
@@ -41,10 +45,8 @@ public class LineView extends AppCompatTextView {
         View.inflate(context, R.layout.connection_holder, null);
     }
 
-    public LineView(Context context, Paint paint, Canvas canvas, Bitmap bitmap, float startX, float startY, float stopX, float stopY, Path path, View view) {
+    public LineView(Context context, Canvas canvas, Bitmap bitmap, float startX, float startY, float stopX, float stopY, Path path, View view, Boolean matchFirst, Boolean matchLast, Boolean matchUnique, Boolean belongs, Boolean noMatch) {
         super(context);
-
-        this.paint = paint;
         this.canvas = canvas;
         this.bitmap = bitmap;
         this.startX = startX;
@@ -53,17 +55,21 @@ public class LineView extends AppCompatTextView {
         this.stopY = stopY;
         this.path = path;
         this.view = view;
+        this.matchFirst = matchFirst;
+        this.matchLast = matchLast;
+        this.belongs = belongs;
+        this.matchUnique = matchUnique;
+        this.noMatch = noMatch;
         View.inflate(context, R.layout.connection_holder, null);
-//        LayoutInflater.from(context).inflate(R.layout.connection_holder, (ViewGroup) view,false);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         paint.setColor(Color.parseColor("#000000"));
-        paint.setStrokeWidth(10);
+        paint.setStrokeWidth(20);
         paint.setStyle(Paint.Style.FILL);
+
         canvas.drawLine(startX, startY, stopX, stopY, paint);
-        Log.d("DRAW", "onDraw: ");
     }
 }

@@ -27,6 +27,6 @@ public class DotView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawCircle(x, y, 2, paint);
+        canvas.drawCircle(x, y, 20, paint);
     }
 }

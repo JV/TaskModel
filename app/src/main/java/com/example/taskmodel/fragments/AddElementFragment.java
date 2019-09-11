@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +63,7 @@ public class AddElementFragment extends Fragment {
                     etNaziv.requestFocus();
                     return;
                 } else {
-                    elementModel.setNaziv(etNaziv.getText().toString());
+                    elementModel.setNaziv(etNaziv.getText().toString().trim());
                 }
 
                 if (etPocetak.getText().toString().equals("")) {
@@ -72,15 +71,15 @@ public class AddElementFragment extends Fragment {
                     etPocetak.requestFocus();
                     return;
                 } else {
-                    elementModel.setPocetak(Long.parseLong(etPocetak.getText().toString()));
+                    elementModel.setPocetak(Long.valueOf((etPocetak.getText().toString().trim())));
                 }
 
                 if (etTag.getText().toString().equals("")) {
-                    Toast.makeText(getContext(), "Please enter end", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Please enter tag", Toast.LENGTH_LONG).show();
                     etTag.requestFocus();
                     return;
                 } else {
-                    elementModel.setTag(etTag.getText().toString());
+                    elementModel.setTag(etTag.getText().toString().trim());
                 }
 
                 elementModel.setId(elementModels.get(elementModels.size() - 1).getId() + 1);
@@ -94,29 +93,25 @@ public class AddElementFragment extends Fragment {
 
                     elementModel.setKraj(totalTime);
                 }
+                elementModels.add(0, elementModel);
 
-                if ((etPocetak.getText().toString().equals(""))) {
+                Gson gson = new Gson();
+                String json = gson.toJson(elementModels);
 
+                sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                } else {
-                    elementModels.add(0, elementModel);
+                editor.putString("MyObjectsList", json);
+                editor.apply();
 
-                    Gson gson = new Gson();
-                    String json = gson.toJson(elementModels);
+                MainActivity activity = (MainActivity) getActivity();
+                activity.doWork();
 
-                    sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                getFragmentManager().beginTransaction().remove(AddElementFragment.this).commit();
 
-                    editor.putString("MyObjectsList", json);
-                    editor.apply();
+                FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
+                fab.show();
 
-                    getFragmentManager().beginTransaction().remove(AddElementFragment.this).commit();
-
-
-                    FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
-                    fab.show();
-
-                }
             }
         });
         btnCancelAddElement.setOnClickListener(new View.OnClickListener() {

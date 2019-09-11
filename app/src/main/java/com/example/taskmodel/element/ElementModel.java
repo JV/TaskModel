@@ -4,12 +4,11 @@ import java.io.Serializable;
 
 public class ElementModel implements Serializable {
 
-    private Long id; //added for differentiating elements with same @naziv, @pocetak, @kraj and @tag
+    private Long id;
     private String naziv;
     private Long pocetak;
     private Long kraj;
     private String tag;
-//    private String creationTime; // for other sort options
 
     public Long getId() {
         return id;

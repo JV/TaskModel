@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-
-// use this class for using data from local database
-
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static String DATABASE_NAME = "elementsDatabase.db";

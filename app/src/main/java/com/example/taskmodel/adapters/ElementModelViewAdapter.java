@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,15 +39,14 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
     private ItemTouchHelper touchHelper;
     private SharedPreferences sharedPreferences;
     private Context mContext;
-    private int limit;
     private List<List<Integer>> coordinates = new ArrayList<>();
     private DoWork doWork;
     protected MainActivity mainActivity;
+    private float screenWidth;
+    private float screenHeight;
+    private long numberOfMaxShownRows = 5;
 
-    private LinearLayout linearLayout;
-
-
-    public ElementModelViewAdapter(List<ElementModel> elementModels, Context context, DoWork doWork, MainActivity mainActivity, List<List<Integer>> coordinates, SharedPreferences sharedPreferences) {
+    public ElementModelViewAdapter(List<ElementModel> elementModels, Context context, DoWork doWork, MainActivity mainActivity, List<List<Integer>> coordinates, SharedPreferences sharedPreferences, Float screenHeight) {
 
         Gson gson = new Gson();
         this.sharedPreferences = sharedPreferences;
@@ -56,14 +54,12 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         Type type = new TypeToken<List<List<Integer>>>() {
         }.getType();
         this.coordinates = gson.fromJson(json, type);
-
-
         this.mainActivity = mainActivity;
         this.doWork = doWork;
-
-        Log.d("COORDIN ADAPTER", "ElementModelViewAdapter: " + this.coordinates.toString());
         this.elementModels = elementModels;
         this.mContext = context;
+        this.screenHeight = screenHeight;
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -71,11 +67,10 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
     @Override
     public ElementModelViewAdapter.ElementHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.element_item, parent, false);
-
+        int height = (int) (screenHeight / 5);
+        view.setMinimumHeight(height);
         ElementHolder holder = new ElementHolder(view);
-
         return holder;
     }
 
@@ -95,78 +90,62 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
 
         for (int i = 0; i < coordinates.size(); i++) {
 
-
             int startX;
             int startY;
             int stopX;
             int stopY;
-            int width = holder.view.getWidth();
-
-            Log.d("WIDTH", "onBindView: " + width);
-            int height = holder.linearLayoutElementItem.getMeasuredHeight();
-            Log.d("HEIGHT", "onBindView: " + height);
+            int height = (int) (screenHeight / numberOfMaxShownRows);
             startX = 0;
             startY = 0;
             stopX = 0;
             stopY = height;
+            boolean matchFirst = false;
+            boolean matchLast = false;
+            boolean matchUnique = false;
+            boolean belongs = false;
+            boolean noMatch = false;
 
-            LineView lineView = new LineView(holder.holderContex, holder.paint, holder.canvas, holder.bitmap, startX, startY, stopX, stopY, holder.path, holder.view);
-            holder.connectionHolders.addView(lineView);
+            LineView lineView = new LineView(holder.holderContex, holder.canvas, holder.bitmap, startX, startY, stopX, stopY, holder.path, holder.view, matchFirst, matchLast, matchUnique, belongs, noMatch);
 
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(20, stopY);
 
-            if (position == coordinates.get(i).get(0)) {
+            holder.connectionHolders.addView(lineView, layoutParams);
+            if (position < coordinates.get(i).get(0) | position > coordinates.get(i).get(1) | coordinates.get(i).get(1) == -1) {
 
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(5, height / 2);
-                lineView.setLayoutParams(lp);
-                lineView.setVisibility(View.VISIBLE);
-
-
-                if (coordinates.get(i).get(1) == -1) {
-
+                    LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(20, stopY);
+                    lineView.setLayoutParams(layoutParams2);
                     lineView.setVisibility(View.INVISIBLE);
 
+            } else {
 
-                } else if (position < coordinates.get(i).get(1)) {
+                if (position == coordinates.get(i).get(0) | position == coordinates.get(i).get(1)) {
 
-                    LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(5, height / 2);
-                    lp2.gravity = Gravity.BOTTOM;
-                    lineView.setLayoutParams(lp2);
-                    lineView.setVisibility(View.VISIBLE);
+                    if (position == coordinates.get(i).get(0)) {
+
+                        matchFirst = true;
+
+                        LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(20, stopY / 2);
+                        layoutParams3.gravity = Gravity.BOTTOM;
+                        lineView.setLayoutParams(layoutParams3);
+                        lineView.setVisibility(View.VISIBLE);
+
+                    } else if (position == coordinates.get(i).get(1)) {
+
+                        matchLast = true;
+
+                        LinearLayout.LayoutParams layoutParams4 = new LinearLayout.LayoutParams(20, stopY / 2);
+                        lineView.setLayoutParams(layoutParams4);
+                        lineView.setVisibility(View.VISIBLE);
+
+                    }
+                } else {
+
+                        LinearLayout.LayoutParams layoutParams5 = new LinearLayout.LayoutParams(20, stopY);
+                        lineView.setLayoutParams(layoutParams5);
+                        lineView.setVisibility(View.VISIBLE);
                 }
             }
-            if (position > coordinates.get(i).get(0) && coordinates.get(i).get(1) == -1) {
-
-                lineView.setVisibility(View.INVISIBLE);
-            }
-
-            if (position < coordinates.get(i).get(0)) {
-
-                LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(5, height);
-                lineView.setLayoutParams(lp2);
-                lineView.setVisibility(View.INVISIBLE);
-
-            }
-
-            if (position > coordinates.get(i).get(0) && position < coordinates.get(i).get(1)) {
-                LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(5, height);
-                lineView.setLayoutParams(lp2);
-                lineView.setVisibility(View.VISIBLE);
-            }
-
-
-            if (position == coordinates.get(i).get(1)) {
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(5, height / 2);
-                lineView.setLayoutParams(lp);
-                lineView.setVisibility(View.VISIBLE);
-
-            }
-            if(position > coordinates.get(i).get(1)) {
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(5, height / 2);
-                lineView.setLayoutParams(lp);
-                lineView.setVisibility(View.INVISIBLE);
-            }
         }
-        Log.d("TEST On BIND", coordinates.toString());
     }
 
     class ElementHolder extends RecyclerView.ViewHolder {
@@ -186,27 +165,18 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         float startY;
         float stopX;
         float stopY;
-
         private LinearLayout linearLayoutElementItem;
-        private Integer width;
-        private Integer height;
-        LineView lineView;
-
 
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
         public ElementHolder(@NonNull View itemView) {
 
             super(itemView);
-
             view = itemView;
             path = new Path();
             holderContex = itemView.getContext();
-
             paint = new Paint();
             bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-
             linearLayoutElementItem = itemView.findViewById(R.id.elementItem);
-
             canvas = new Canvas(bitmap);
             tvNaziv = itemView.findViewById(R.id.tvNaziv);
             tvPocetak = itemView.findViewById(R.id.tvPocetak);
@@ -217,7 +187,6 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
             startY = 0;
             stopX = 0;
             stopY = 0;
-
         }
 
         public float getStartX() {
@@ -278,6 +247,7 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
 
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
+
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
                 Collections.swap(elementModels, i, i + 1);
@@ -296,7 +266,6 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         editor.putBoolean("listMovedAround", true);
         editor.apply();
         notifyItemMoved(fromPosition, toPosition);
-        doWork.doWork();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -312,12 +281,10 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         editor.putString("MyObjectsList", json);
         editor.apply();
         notifyItemRemoved(position);
-        doWork.doWork();
     }
 
     public void setTouchHelper(ItemTouchHelper touchHelper) {
         this.touchHelper = touchHelper;
     }
-
 
 }

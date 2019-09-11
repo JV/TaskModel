@@ -2,64 +2,63 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/elementItem"
     android:layout_width="match_parent"
-    android:layout_height="96dp"
-    android:background="@android:color/transparent"
+    android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
     android:onClick="showItem"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingLeft="8dp"
+    android:paddingEnd="24dp"
+    android:paddingRight="24dp">
 
     <LinearLayout
 
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:background="@android:color/transparent"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <LinearLayout
+        <TextView
 
+            android:id="@+id/tvPocetak"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
 
-            <TextView
+            android:padding="4dp"
+            android:text="asfa" />
 
-                android:id="@+id/tvPocetak"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:text="asfa" />
+        <TextView
 
-            <TextView
+            android:id="@+id/tvKraj"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
-                android:id="@+id/tvKraj"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:text="asdasd" />
+            android:padding="4dp"
+            android:text="asdasd" />
 
-            <TextView
+        <TextView
 
-                android:id="@+id/tvNaziv"
-                android:layout_width="96dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:text="TextView" />
+            android:id="@+id/tvNaziv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
-        </LinearLayout>
+            android:padding="4dp"
+            android:text="TextView" />
 
     </LinearLayout>
 
     <LinearLayout
 
         android:id="@+id/conncectionHolders"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:background="@android:color/transparent"
+        android:gravity="end"
         android:orientation="horizontal">
 
     </LinearLayout>
-
 
 </LinearLayout>

@@ -3,25 +3,20 @@ package com.example.taskmodel.backgroundTasks;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmodel.MainActivity;
-import com.example.taskmodel.adapters.ElementModelViewAdapter;
 import com.example.taskmodel.element.ElementModel;
-import com.example.taskmodel.view.LineView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -40,32 +35,25 @@ public class UiHandlerThread extends HandlerThread {
     private RecyclerView recyclerViewMain;
     private int limit;
     private List<String> allTags;
-    private Boolean matchExists;
     boolean firstPosition;
     boolean secondPosition;
-    private boolean drawLine = false;
     private List<List<Integer>> coordinates = new ArrayList<>();
     private int tagPosition = 0;
-    private ElementModelViewAdapter mmAdapter;
     private MainActivity mainActivity;
     private Set<String> differentTagsLimit = new LinkedHashSet<>();
-    private LineView lineView;
     private Canvas canvas;
-    private Paint paint;
-    private Bitmap bitmap;
     private Path path;
-    float startX;
-    float startY;
-    float stopX;
-    float stopY;
+    private float startX;
+    private float startY;
+    private float stopX;
+    private float stopY;
 
     public UiHandlerThread(String name, int priority, Context context, MainActivity mainActivity,
                            RecyclerView recyclerView, List<ElementModel> elementModels, Set set,
-                           Canvas canvas, Paint paint, Bitmap bitmap, Path path, Float startX,
+                           Canvas canvas, Path path, Float startX,
                            Float startY, Float stopX, Float stopY, SharedPreferences sharedPreferences) {
         super("handleUIUpdateOnTagValue", Process.THREAD_PRIORITY_DEFAULT);
         this.canvas = canvas;
-        this.paint = paint;
         this.mContext = context;
         this.mainActivity = mainActivity;
         this.recyclerViewMain = recyclerView;
@@ -74,12 +62,10 @@ public class UiHandlerThread extends HandlerThread {
         this.limit = set.size();
         this.allTags = new ArrayList<String>(set);
         this.path = path;
-        this.bitmap = bitmap;
         this.startX = startX;
         this.startY = startY;
         this.stopX = stopX;
         this.stopY = stopY;
-        this.mmAdapter = mmAdapter;
         this.differentTagsLimit = set;
     }
 
@@ -101,10 +87,8 @@ public class UiHandlerThread extends HandlerThread {
                         coordinates.clear();
 
                         Gson gson = new Gson();
-
                         String json = sharedPreferences.getString("MyObjectsList", "");
                         String json1 = sharedPreferences.getString("DifferentTagList", "");
-
                         Type type1 = new TypeToken<Set<String>>() {
                         }.getType();
                         Type type = new TypeToken<List<ElementModel>>() {
@@ -114,24 +98,20 @@ public class UiHandlerThread extends HandlerThread {
                         allTags = new ArrayList<>(differentTagsLimit);
                         limit = differentTagsLimit.size();
 
-                        for (int i = 0; i < limit; i++) {
+                        for (tagPosition = 0; tagPosition < limit; tagPosition++) {
                             coordinates.add(new ArrayList<>());
                             findFirst(tagPosition);
                             if (firstPosition) {
                                 findLast(tagPosition);
-                                secondPosition = false;
+                                if (secondPosition) {
+                                    secondPosition = false;
+                                }
                             }
-                            tagPosition++;
                         }
-
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-
                         String json2 = gson.toJson(coordinates);
                         editor.putString("CoordinatesList", json2);
-
                         editor.apply();
-
-                        Log.d("Coords", "run: " + coordinates.toString());
                     }
                 });
             }
@@ -142,7 +122,7 @@ public class UiHandlerThread extends HandlerThread {
 
         reverseList(elementModels);
 
-        for (int j = 0; j < elementModels.size() - 1; j++) {
+        for (int j = 0; j < elementModels.size(); j++) {
 
             int distanceFromEnd = elementModels.size() - 1 - coordinates.get(tagPosition).get(0);
 
@@ -171,7 +151,7 @@ public class UiHandlerThread extends HandlerThread {
 
     private void findFirst(int tagPosition) {
 
-        for (int x = 0; x < elementModels.size() - 1; x++) {
+        for (int x = 0; x < elementModels.size(); x++) {
 
             String searchItem = allTags.get(tagPosition);
             firstPosition = elementModels.get(x).getTag().equals(searchItem);

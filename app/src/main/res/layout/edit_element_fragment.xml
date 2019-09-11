@@ -4,12 +4,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@android:color/white">
+    android:id="@+id/fragmentEditId"
+    android:background="@android:color/white"
+    android:clickable="true">
 
     <EditText
         android:id="@+id/etEditNaziv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="1"
         android:hint="@string/addNaziv" />
 
     <EditText
@@ -17,6 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/addPocetak"
+        android:maxLines="1"
         android:inputType="number" />
 
     <TimePicker
@@ -28,6 +32,7 @@
         android:id="@+id/etEditTag"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="1"
         android:hint="@string/addTag" />
 
     <LinearLayout
@@ -51,8 +56,4 @@
             android:text="@string/cancelAddElementButton" />
 
     </LinearLayout>
-
-
-
-
 </LinearLayout>

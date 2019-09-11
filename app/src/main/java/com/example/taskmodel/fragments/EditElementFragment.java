@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,13 +44,9 @@ public class EditElementFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-
         mContext = getActivity().getApplicationContext();
         Bundle bundle = this.getArguments();
-
-//        elementModels = (List<ElementModel>) bundle.getSerializable("valuesList");
         final List<ElementModel> elementModels = (List<ElementModel>) bundle.getSerializable("valuesList");
-//        itemPosition = bundle.getLong("editItemPosition");
         final long itemPosition = bundle.getLong("editItemPosition");
 
         View view = inflater.inflate(R.layout.edit_element_fragment, container, false);
@@ -76,13 +71,13 @@ public class EditElementFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-                elementModels.get((int) itemPosition).setNaziv(etNaziv.getText().toString());
-                elementModels.get((int) itemPosition).setPocetak(Long.valueOf(etPocetak.getText().toString()));
+                elementModels.get((int) itemPosition).setNaziv(etNaziv.getText().toString().trim());
+                elementModels.get((int) itemPosition).setPocetak(Long.parseLong(etPocetak.getText().toString().trim()));
                 long hour = timePicker.getHour();
                 long minute = timePicker.getMinute();
                 long totalTime = hour * 60 + minute;
                 elementModels.get((int) itemPosition).setKraj(totalTime);
-                elementModels.get((int) itemPosition).setTag(etTag.getText().toString());
+                elementModels.get((int) itemPosition).setTag(etTag.getText().toString().trim());
 
                 Gson gson = new Gson();
                 String json = gson.toJson(elementModels);
@@ -92,6 +87,9 @@ public class EditElementFragment extends Fragment {
 
                 editor.putString("MyObjectsList", json);
                 editor.apply();
+
+                MainActivity activity = (MainActivity) getActivity();
+                activity.doWork();
 
                 FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
                 fab.show();
@@ -110,7 +108,6 @@ public class EditElementFragment extends Fragment {
                 fab.show();
             }
         });
-
         return view;
     }
 

@@ -9,10 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-
         >
         <activity android:name=".MainActivity"
-            android:screenOrientation="sensor">
+            android:screenOrientation="sensor"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,5 +22,5 @@
     </application>
 
 </manifest>
-    <!--android:configChanges="keyboardHidden|orientation|screenSize"-->
+
 <!--<uses-permission android:name="android.permission.INTERNET" />-->

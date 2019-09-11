@@ -5,12 +5,14 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -25,7 +27,6 @@ import com.example.taskmodel.element.ElementModel;
 import com.example.taskmodel.fragments.AddElementFragment;
 import com.example.taskmodel.fragments.EditElementFragment;
 import com.example.taskmodel.interfaces.DoWork;
-import com.example.taskmodel.view.LineView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -50,32 +51,31 @@ public class MainActivity extends AppCompatActivity implements DoWork {
     private SharedPreferences sharedPreferences;
     private UiHandlerThread handlerThread;
     private List<List<Integer>> coordinates = new ArrayList<>();
+    private LinearLayout linearLayout;
 
     protected MainActivity mainActivity;
 
-    private DoWork doWork;
-    private LineView lineView;
+    private long maxNumberOfTagsForDevice;
+
     private Canvas canvas;
     private Paint paint;
     private Bitmap bitmap;
     private Path path;
-    float startX = 0;
-    float startY = 0;
-    float stopX = 0;
-    float stopY = 0;
+    private float screenHeight;
+    private float screenWidth;
+    private View screen;
+    private EditElementFragment editElementFragment;
+    private AddElementFragment addElementFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        bitmap = Bitmap.createBitmap(2, 96, Bitmap.Config.ARGB_8888);
-        canvas = new Canvas(bitmap);
-        paint = new Paint();
-        path = new Path();
+        getDisplay();
+        setContentView(R.layout.activity_main);
+        setupGraphics();
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         Gson gson = new Gson();
@@ -88,60 +88,80 @@ public class MainActivity extends AppCompatActivity implements DoWork {
         }.getType();
         coordinates = gson.fromJson(json, type);
 
-        if (!sharedPreferences.getBoolean("firstTime", false)) {
-
-            populateLists();
-            SharedPreferences.Editor editor1 = sharedPreferences.edit();
-            editor1.putBoolean("firstTime", true);
-            editor1.apply();
-            saveMockData();
-        }
-
+        createMockData();
         loadPrefs();
+
         saveDifferentTags();
         initViews();
         setupListeners();
-
-//        setUpScreen();
-
         prepareElementData();
-
-        handlerThread = new UiHandlerThread("handleUIUpdateOnTagValue",
-                Process.THREAD_PRIORITY_DEFAULT, this, mainActivity, recyclerViewMain,
-                elementModels, differentTagsLimit, canvas, paint, bitmap, path, startX, startY, stopX, stopY, sharedPreferences);
-        handlerThread.start();
-
-        mmAdapter = new ElementModelViewAdapter(elementModels, getApplicationContext(), this, mainActivity, coordinates, sharedPreferences);
-
+        initThread();
+        setUpScreen();
         doWork();
+    }
 
+    private void setUpScreen() {
+        mmAdapter = new ElementModelViewAdapter(elementModels, getApplicationContext(), this, mainActivity, coordinates, sharedPreferences, screenHeight);
         recyclerViewMain.setLayoutManager(new LinearLayoutManager(this));
-        SimpleItemTouchHelperCallback simpleItemTouchHelperCallback = new SimpleItemTouchHelperCallback(mmAdapter, getApplicationContext());
+        SimpleItemTouchHelperCallback simpleItemTouchHelperCallback = new SimpleItemTouchHelperCallback(mmAdapter, getApplicationContext(), this);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchHelperCallback);
         mmAdapter.setTouchHelper(itemTouchHelper);
         recyclerViewMain.setAdapter(mmAdapter);
         itemTouchHelper.attachToRecyclerView(recyclerViewMain);
         recyclerViewMain.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        doWork();
+
+    }
+
+    private void setupGraphics() {
+        bitmap = Bitmap.createBitmap((int) screenWidth, (int) screenHeight, Bitmap.Config.ARGB_8888);
+        canvas = new Canvas(bitmap);
+        paint = new Paint();
+        path = new Path();
+    }
+
+    private void getDisplay() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenWidth = size.x;
+        screenHeight = size.y;
+    }
+
+    private void initThread() {
+        handlerThread = new UiHandlerThread("handleUIUpdateOnTagValue",
+                Process.THREAD_PRIORITY_DEFAULT, this, mainActivity, recyclerViewMain,
+                elementModels, differentTagsLimit, canvas, path, (float) 0, (float) 0, screenWidth, screenHeight, sharedPreferences);
+        handlerThread.start();
     }
 
     @Override
     public void doWork() {
+
+        for (ElementModel elementModel : elementModels) {
+            differentTagsLimit.add(elementModel.getTag());
+        }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(differentTagsLimit);
+        editor.putString("DifferentTagList", json);
+        editor.apply();
+
         Message message = Message.obtain();
         Bundle bundle = new Bundle();
         bundle.putSerializable("valuesList", (Serializable) elementModels);
-        Log.d("DoWORK", "DoWork: " + elementModels.toString());
+
         message.setData(bundle);
         handlerThread.getHandler().sendMessage(message);
 
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("CoordinatesList", "");
+        String json1 = sharedPreferences.getString("CoordinatesList", "");
         Type type = new TypeToken<List<List<Integer>>>() {
         }.getType();
-        coordinates = gson.fromJson(json, type);
+        coordinates = gson.fromJson(json1, type);
 
-        mmAdapter = new ElementModelViewAdapter(elementModels, getApplicationContext(), this, mainActivity, coordinates, sharedPreferences);
+        mmAdapter = new ElementModelViewAdapter(elementModels, getApplicationContext(), this, mainActivity, coordinates, sharedPreferences, screenHeight);
+
+        recyclerViewMain.setAdapter(mmAdapter);
         mmAdapter.notifyDataSetChanged();
 
     }
@@ -192,6 +212,8 @@ public class MainActivity extends AppCompatActivity implements DoWork {
     private void initViews() {
         recyclerViewMain = findViewById(R.id.recyclerviewMain);
         floatingActionButton = findViewById(R.id.floating_action_button);
+        linearLayout = findViewById(R.id.connectionHolder);
+
     }
 
     private void setupListeners() {
@@ -202,10 +224,9 @@ public class MainActivity extends AppCompatActivity implements DoWork {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("valuesList", (Serializable) elementModels);
 
-                AddElementFragment addElementFragment = new AddElementFragment();
+                addElementFragment = new AddElementFragment();
                 addElementFragment.setArguments(bundle);
-                getSupportFragmentManager().beginTransaction().replace(R.id.activityMain, addElementFragment).commit();
-
+                getSupportFragmentManager().beginTransaction().addToBackStack("addElementFragment").replace(R.id.activityMain, addElementFragment).commit();
                 floatingActionButton.hide();
             }
         });
@@ -217,10 +238,22 @@ public class MainActivity extends AppCompatActivity implements DoWork {
         Bundle bundle = new Bundle();
         bundle.putSerializable("valuesList", (Serializable) elementModels);
         bundle.putLong("editItemPosition", itemPosition);
-        EditElementFragment editElementFragment = new EditElementFragment();
+        editElementFragment = new EditElementFragment();
         editElementFragment.setArguments(bundle);
-        getSupportFragmentManager().beginTransaction().replace(R.id.activityMain, editElementFragment).commit();
+        getSupportFragmentManager().beginTransaction().addToBackStack("editElementFragment").replace(R.id.activityMain, editElementFragment).commit();
         floatingActionButton.hide();
+    }
+
+    private void createMockData() {
+        if (!sharedPreferences.getBoolean("firstTime", false)) {
+
+            populateLists();
+            SharedPreferences.Editor editor1 = sharedPreferences.edit();
+            editor1.putBoolean("firstTime", true);
+            editor1.apply();
+            saveMockData();
+        }
+
     }
 
     private void populateLists() {
@@ -247,5 +280,12 @@ public class MainActivity extends AppCompatActivity implements DoWork {
     protected void onDestroy() {
         super.onDestroy();
         handlerThread.quit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+            getSupportFragmentManager().popBackStackImmediate();
+        else super.onBackPressed();
     }
 }
