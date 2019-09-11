@@ -72,6 +72,7 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         view.setMinimumHeight(height);
         ElementHolder holder = new ElementHolder(view);
         return holder;
+
     }
 
     @Override
