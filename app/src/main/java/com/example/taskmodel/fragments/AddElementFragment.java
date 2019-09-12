@@ -107,7 +107,7 @@ public class AddElementFragment extends Fragment {
                 MainActivity activity = (MainActivity) getActivity();
                 activity.doWork();
 
-                getFragmentManager().beginTransaction().remove(AddElementFragment.this).commit();
+                getFragmentManager().beginTransaction().remove(AddElementFragment.this).commitAllowingStateLoss();
 
                 FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
                 fab.show();
@@ -117,7 +117,7 @@ public class AddElementFragment extends Fragment {
         btnCancelAddElement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getFragmentManager().beginTransaction().remove(AddElementFragment.this).commit();
+                getFragmentManager().beginTransaction().remove(AddElementFragment.this).commitAllowingStateLoss();
                 FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
                 fab.show();
             }

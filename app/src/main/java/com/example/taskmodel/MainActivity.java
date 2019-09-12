@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements DoWork {
         mmAdapter.setTouchHelper(itemTouchHelper);
         recyclerViewMain.setAdapter(mmAdapter);
         itemTouchHelper.attachToRecyclerView(recyclerViewMain);
-        recyclerViewMain.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+//        recyclerViewMain.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
 
     }

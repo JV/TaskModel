@@ -94,7 +94,7 @@ public class EditElementFragment extends Fragment {
                 FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
                 fab.show();
 
-                getFragmentManager().beginTransaction().remove(EditElementFragment.this).commit();
+                getFragmentManager().beginTransaction().remove(EditElementFragment.this).commitAllowingStateLoss();
 
             }
         });
@@ -103,7 +103,7 @@ public class EditElementFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-                getFragmentManager().beginTransaction().remove(EditElementFragment.this).commit();
+                getFragmentManager().beginTransaction().remove(EditElementFragment.this).commitAllowingStateLoss();
                 FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
                 fab.show();
             }
