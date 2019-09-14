@@ -7,7 +7,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Message;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,16 +25,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmodel.MainActivity;
 import com.example.taskmodel.R;
+import com.example.taskmodel.backgroundTasks.UiHandlerThread;
 import com.example.taskmodel.element.ElementModel;
-import com.example.taskmodel.interfaces.DoWork;
 import com.example.taskmodel.view.LineView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelViewAdapter.ElementHolder> implements SimpleItemTouchHelperCallback.ItemTouchHelperAdapter {
 
@@ -40,13 +46,20 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
     private SharedPreferences sharedPreferences;
     private Context mContext;
     private List<List<Integer>> coordinates = new ArrayList<>();
-    private DoWork doWork;
     protected MainActivity mainActivity;
     private float screenWidth;
     private float screenHeight;
     private long numberOfMaxShownRows = 5;
+    private Set<String> differentTagsLimit = new LinkedHashSet<>();
+    private UiHandlerThread uiHandlerThread;
+    private ElementModelViewAdapter mmAdapter;
+    private RecyclerView recyclerViewMain;
 
-    public ElementModelViewAdapter(List<ElementModel> elementModels, Context context, DoWork doWork, MainActivity mainActivity, List<List<Integer>> coordinates, SharedPreferences sharedPreferences, Float screenHeight) {
+
+    public ElementModelViewAdapter(List<ElementModel> elementModels, Context context,
+                                   MainActivity mainActivity, List<List<Integer>> coordinates,
+                                   SharedPreferences sharedPreferences, Float screenHeight,
+                                   UiHandlerThread handlerThread) {
 
         Gson gson = new Gson();
         this.sharedPreferences = sharedPreferences;
@@ -55,11 +68,20 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         }.getType();
         this.coordinates = gson.fromJson(json, type);
         this.mainActivity = mainActivity;
-        this.doWork = doWork;
-        this.elementModels = elementModels;
         this.mContext = context;
         this.screenHeight = screenHeight;
 
+        Gson gson1 = new Gson();
+        String json1 = sharedPreferences.getString("MyObjectsList", "");
+        String json2 = sharedPreferences.getString("DifferentTagList", "");
+        Type type1 = new TypeToken<Set<String>>() {
+        }.getType();
+        Type type2 = new TypeToken<List<ElementModel>>() {
+        }.getType();
+        this.elementModels = gson1.fromJson(json1, type2);
+        this.differentTagsLimit = gson1.fromJson(json2, type1);
+        Log.d("ADAPTER", elementModels.toString());
+        this.uiHandlerThread = handlerThread;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -113,9 +135,9 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
             holder.connectionHolders.addView(lineView, layoutParams);
             if (position < coordinates.get(i).get(0) | position > coordinates.get(i).get(1) | coordinates.get(i).get(1) == -1) {
 
-                    LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(20, stopY);
-                    lineView.setLayoutParams(layoutParams2);
-                    lineView.setVisibility(View.INVISIBLE);
+                LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(20, stopY);
+                lineView.setLayoutParams(layoutParams2);
+                lineView.setVisibility(View.INVISIBLE);
 
             } else {
 
@@ -141,9 +163,9 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
                     }
                 } else {
 
-                        LinearLayout.LayoutParams layoutParams5 = new LinearLayout.LayoutParams(20, stopY);
-                        lineView.setLayoutParams(layoutParams5);
-                        lineView.setVisibility(View.VISIBLE);
+                    LinearLayout.LayoutParams layoutParams5 = new LinearLayout.LayoutParams(20, stopY);
+                    lineView.setLayoutParams(layoutParams5);
+                    lineView.setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -264,9 +286,15 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
         Gson gson = new Gson();
         String json = gson.toJson(elementModels);
         editor.putString("MyObjectsList", json);
-        editor.putBoolean("listMovedAround", true);
         editor.apply();
-        notifyItemMoved(fromPosition, toPosition);
+
+        Message message = Message.obtain();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("valuesList", (Serializable) elementModels);
+        message.setData(bundle);
+        uiHandlerThread.getHandler().sendMessage(message);
+
+        notifyDataSetChanged();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -275,17 +303,29 @@ public class ElementModelViewAdapter extends RecyclerView.Adapter<ElementModelVi
 
         elementModels.remove(position);
 
-        Gson gson = new Gson();
-        String json = gson.toJson(elementModels);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(elementModels);
         editor.putString("MyObjectsList", json);
         editor.apply();
-        notifyItemRemoved(position);
+
+        Message message = Message.obtain();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("valuesList", (Serializable) elementModels);
+
+        message.setData(bundle);
+        uiHandlerThread.getHandler().sendMessage(message);
+
+        notifyDataSetChanged();
+
+    }
+
+    public ItemTouchHelper getTouchHelper() {
+        return touchHelper;
     }
 
     public void setTouchHelper(ItemTouchHelper touchHelper) {
         this.touchHelper = touchHelper;
     }
-
 }

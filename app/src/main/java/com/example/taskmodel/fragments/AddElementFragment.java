@@ -4,7 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,13 +19,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmodel.MainActivity;
 import com.example.taskmodel.R;
+import com.example.taskmodel.adapters.ElementModelViewAdapter;
+import com.example.taskmodel.backgroundTasks.UiHandlerThread;
 import com.example.taskmodel.element.ElementModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AddElementFragment extends Fragment {
@@ -30,6 +41,24 @@ public class AddElementFragment extends Fragment {
     private List<ElementModel> elementModels;
     private SharedPreferences sharedPreferences;
     private Context mContext;
+    private Handler handler = new Handler();
+    private UiHandlerThread uiHandlerThread;
+    private ElementModelViewAdapter mmAdapter;
+    private RecyclerView recyclerViewMain;
+    private List<List<Integer>> coordinates = new ArrayList<>();
+    private float screenHeight;
+    protected MainActivity mainActivity;
+    private FragmentManager fragmentManager;
+
+    public AddElementFragment(UiHandlerThread handlerThread, ElementModelViewAdapter mmAdapter,
+                              RecyclerView recyclerViewMain, Float screenHeight, MainActivity mainActivity) {
+        this.uiHandlerThread = handlerThread;
+        this.mmAdapter = mmAdapter;
+        this.recyclerViewMain = recyclerViewMain;
+        this.screenHeight = screenHeight;
+        this.mainActivity = mainActivity;
+        fragmentManager = this.mainActivity.getSupportFragmentManager();
+    }
 
     @Nullable
     @Override
@@ -37,6 +66,7 @@ public class AddElementFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
         elementModels = (List<ElementModel>) bundle.getSerializable("valuesList");
+
         mContext = getActivity().getApplicationContext();
         return inflater.inflate(R.layout.fragment_add_element, container, false);
     }
@@ -56,8 +86,16 @@ public class AddElementFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
+                sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                Gson gson = new Gson();
+                String json5 = sharedPreferences.getString("MyObjectsList", "");
+                Type type5 = new TypeToken<List<ElementModel>>() {
+                }.getType();
+                elementModels = gson.fromJson(json5, type5);
+
                 ElementModel elementModel = new ElementModel();
                 elementModel.setId(elementModels.get(elementModels.size() - 1).getId() + 1);
+                Log.d("ADDCLICKED", "onClick: " + elementModels.get(elementModels.size() - 1).getId());
                 if (etNaziv.getText().toString().equals("")) {
                     Toast.makeText(getContext(), "Please enter name", Toast.LENGTH_LONG).show();
                     etNaziv.requestFocus();
@@ -95,31 +133,45 @@ public class AddElementFragment extends Fragment {
                 }
                 elementModels.add(0, elementModel);
 
-                Gson gson = new Gson();
-                String json = gson.toJson(elementModels);
-
                 sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                editor.putString("MyObjectsList", json);
+                String json1 = gson.toJson(elementModels);
+                editor.putString("MyObjectsList", json1);
                 editor.apply();
 
-                MainActivity activity = (MainActivity) getActivity();
-                activity.doWork();
+                Message message = Message.obtain();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("valuesList", (Serializable) elementModels);
+                message.setData(bundle);
+                uiHandlerThread.getHandler().sendMessage(message);
 
-                getFragmentManager().beginTransaction().remove(AddElementFragment.this).commitAllowingStateLoss();
+                String json21 = sharedPreferences.getString("CoordinatesList", "");
+                Type type = new TypeToken<List<List<Integer>>>() {
+                }.getType();
+                coordinates = gson.fromJson(json21, type);
 
-                FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
+                mmAdapter = new ElementModelViewAdapter(elementModels, mContext,
+                        mainActivity, coordinates, sharedPreferences, screenHeight, uiHandlerThread);
+                recyclerViewMain.setAdapter(mmAdapter);
+                mmAdapter.notifyDataSetChanged();
+
+                fragmentManager.beginTransaction().remove(AddElementFragment.this)
+                        .commitAllowingStateLoss();
+                FloatingActionButton fab = ((MainActivity) getActivity())
+                        .findViewById(R.id.floating_action_button);
                 fab.show();
-
+                fragmentManager.popBackStackImmediate();
             }
         });
         btnCancelAddElement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getFragmentManager().beginTransaction().remove(AddElementFragment.this).commitAllowingStateLoss();
-                FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
+                fragmentManager.beginTransaction().remove(AddElementFragment.this)
+                        .commitAllowingStateLoss();
+                FloatingActionButton fab = ((MainActivity) getActivity())
+                        .findViewById(R.id.floating_action_button);
                 fab.show();
+                fragmentManager.popBackStackImmediate();
             }
         });
     }
@@ -127,7 +179,8 @@ public class AddElementFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        FloatingActionButton fab = ((MainActivity) getActivity()).findViewById(R.id.floating_action_button);
+        FloatingActionButton fab = ((MainActivity) getActivity())
+                .findViewById(R.id.floating_action_button);
         fab.show();
     }
 }
